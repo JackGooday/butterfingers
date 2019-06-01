@@ -1,6 +1,7 @@
 // Define pin connections & motor's steps per revolution
-const int dirPin = 3;
 const int stepPin = 2;
+const int dirPin = 3;
+const int sleepPin = 4;
 const int stepsPerRevolution = 200;
 
 void setup()
@@ -10,23 +11,21 @@ void setup()
   // Declare pins as Outputs
   pinMode(stepPin, OUTPUT);
   pinMode(dirPin, OUTPUT);
-}
+  pinMode(sleepPin, OUTPUT);
 
-void loop(){
-  sin_move();
-}
+  digitalWrite(sleepPin, HIGH);
 
-
-
-void sin_move(){
   // Set motor direction clockwise
-  digitalWrite(dirPin, HIGH);
-
+  //digitalWrite(dirPin, HIGH); //not required, has a default
   unsigned long T = 3000;   //duration in ms
   float S = 2.5;
   int O = 0;
-
   sin_move(T, S, O);
+
+  digitalWrite(sleepPin, LOW);
+}
+
+void loop(){
 }
 
 void sin_move(int T, float S, int O){
