@@ -1,44 +1,123 @@
-// Define pin connections & motor's steps per revolution
-const int stepPin = 2;
-const int dirPin = 3;
-const int sleepPin = 4;
-const int stepsPerRevolution = 200;
+
+
+class stepper {
+  /*
+   * Class for a stepper motor driven by the
+   * Pololu DRV8825 stepper motor driver
+   */
+  public:   // Make all variables public
+  
+  int dirPin;
+  int stepPin;
+  int sleepPin;
+  int stepsPerRevolution;
+
+  int currentPosition;      // Position of the motor, in full steps
+  boolean currentDirection; // True=clockwise
+  boolean powerStatus;      // True=not sleeping
+
+  stepper(int dir, int stp, int slp, int spr) {
+    /*
+     * Constructor for the stepper class
+     * dir - direction pin          (driver)
+     * stp - stepper pin            (driver)
+     * slp - sleep pin              (driver)
+     * spr - steps per revolution   (motor)
+     */
+     
+     dirPin = dir;
+     stepPin = stp;
+     sleepPin = slp;
+     stepsPerRevolution = spr;
+
+     currentPosition = 0;
+     currentDirection = true;
+     powerStatus = false;
+
+     pinMode(dirPin, OUTPUT);
+     pinMode(stepPin, OUTPUT);
+     pinMode(sleepPin, OUTPUT);
+
+     digitalWrite(dirPin, currentDirection);
+     digitalWrite(sleepPin, powerStatus);
+
+  }
+
+
+  void turn_on(){
+    powerStatus = true;
+    digitalWrite(sleepPin, powerStatus);
+  }
+
+  void turn_off(){
+    powerStatus = false;
+    digitalWrite(sleepPin, powerStatus);
+  }
+
+  void clockwise(){
+    currentDirection = true;
+    digitalWrite(dirPin, currentDirection);
+  }
+
+  void anticlockwise(){
+    currentDirection = false;
+    digitalWrite(dirPin, currentDirection);
+  }
+
+  void change_direction(){
+    currentDirection = ~currentDirection;
+    digitalWrite(dirPin, currentDirection);
+  }
+
+  void take_step(int del){
+    /*
+     * Steps the motor once
+     * del is the total duration for this
+     * action, in MICROseconds
+     */
+    del /= 2;
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(del);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(del);
+    //currentPosition++;
+  }
+};
+
+
+
+stepper stepper1(3, 2, 4, 200);
 
 void setup()
 {
   Serial.begin(9600);
-  
-  // Declare pins as Outputs
-  pinMode(stepPin, OUTPUT);
-  pinMode(dirPin, OUTPUT);
-  pinMode(sleepPin, OUTPUT);
 
-  digitalWrite(sleepPin, HIGH);
+  stepper1.turn_on();
 
-  // Set motor direction clockwise
-  //digitalWrite(dirPin, HIGH); //not required, has a default
-  unsigned long T = 3000;   //duration in ms
-  float S = 2.5;
-  int O = 0;
-  sin_move(T, S, O);
+  unsigned long T = 3000;             //duration in ms
+  float S = 2.5;                      //revolutions to spin
+  sin_move(stepper1, T, S);
 
-  digitalWrite(sleepPin, LOW);
+  stepper1.turn_off();
 }
 
 void loop(){
 }
 
-void sin_move(int T, float S, int O){
+void sin_move(stepper motor, int T, float S){
   /*
-   * Moves the stepper in a sinusoidal motion
-   * S = number of revolutions to spin (then spin back)
+   * Moves a stepper in a sinusoidal motion
+   * 
+   * motor = stepper object
    * T = duration for spin forwards then back to take (ms)
-   * O = current offset of motor
+   * S = number of revolutions to spin (then spin back)
    * 
    * Requires global variable stepsPerRevolution
    */
+
+  int O = motor.currentPosition;
    
-  int number_of_steps = S*stepsPerRevolution;
+  int number_of_steps = S*motor.stepsPerRevolution;
   float phi = PI + O;
   float omega = 2*PI/T;
 
@@ -59,31 +138,20 @@ void sin_move(int T, float S, int O){
 
     //If we need to step backwards, flip the direction
     if(no_steps_to_take<0){
-      digitalWrite(dirPin, LOW);
+      motor.anticlockwise();
       no_steps_to_take = -no_steps_to_take;
     }
     else{
-      digitalWrite(dirPin, HIGH);
+      motor.clockwise();
     }
 
     //Take the steps
     time_between_steps_us = 1000/no_steps_to_take;  // 1000us / number of steps to take
     for(int i=0; i<no_steps_to_take; i++){
-      step_motor(time_between_steps_us);
+      motor.take_step(time_between_steps_us);
     }
     
     curr_pos = next_pos;
     ms++;
   }
-}
-
-void step_motor(int del){
-  //Steps the motor once
-  //del is the TOTAL duration for this action
-  //del is in MICROseconds
-  del /= 2;
-  digitalWrite(stepPin, HIGH);
-  delayMicroseconds(del);
-  digitalWrite(stepPin, LOW);
-  delayMicroseconds(del);
 }
