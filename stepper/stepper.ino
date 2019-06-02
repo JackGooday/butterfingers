@@ -146,7 +146,6 @@ class stepper {
     
   }
 
-
   void take_step(int del){
     /*
      * Steps the motor once
@@ -171,21 +170,42 @@ void setup()
   Serial.begin(9600);
 
   stepper1.turn_on();
-
-  unsigned long T = 3000;             //duration in ms
-  float S = 2.5;                      //revolutions to spin
-  sin_move(stepper1, T, S);
-
+  spin(stepper1, 2, 5);
   stepper1.turn_off();
-  
-  delay(2000);
-  stepper1.turn_on();
-  stepper1.change_mode(4);
-  sin_move(stepper1, T, S);
-  stepper1.turn_off();
+
+//  unsigned long T = 3000;             //duration in ms
+//  float S = 2.5;                      //revolutions to spin
+//  sin_move(stepper1, T, S);
+//
+//  stepper1.turn_off();
+//  
+//  delay(2000);
+//  stepper1.turn_on();
+//  stepper1.change_mode(4);
+//  sin_move(stepper1, T, S);
+//  stepper1.turn_off();
 }
 
 void loop(){
+}
+
+void spin(stepper motor, int f, int t){
+  /*
+   * Spins the motor at a given frequency f for
+   * t seconds
+   * 
+   * We want to take <stepsPerRevolution> steps
+   * in 1/f SECONDS = 1,000,000/f MICROseconds
+   * So, each step should take
+   * 1,000,000/(f*stepsPerRevolution) us
+   * 
+   * We want to take t*1000000/del steps
+   */
+  int del = 1000000/(f*motor.stepsPerRevolution);
+  int steps = 1000000*t/del;
+  for(int step_no=0; step_no<steps; step_no++){
+    motor.take_step(del);
+  }
 }
 
 void sin_move(stepper motor, int T, float S){
