@@ -1,6 +1,6 @@
 
 
-class stepper {
+class stepper_driver {
   /*
    * Class for a stepper motor driven by the
    * Pololu DRV8825 stepper motor driver
@@ -21,7 +21,7 @@ class stepper {
   byte mode;                // Step mode
   float stepSize;           // Number of steps per full step
 
-  stepper(int dir, int stp, int slp, int spr, int mp0=-1, int mp1=-1, int mp2=-1) {
+  stepper_driver(int dir, int stp, int slp, int spr=200, int mp0=-1, int mp1=-1, int mp2=-1) {
     /*
      * Constructor for the stepper class
      * dir - direction pin                (driver)
@@ -32,6 +32,8 @@ class stepper {
      * mp1 - mode pin 1
      * mp2 - mode pin 2
      */
+
+     Serial.println("Entered constructor");
      
      dirPin = dir;
      stepPin = stp;
@@ -63,6 +65,14 @@ class stepper {
      digitalWrite(dirPin, currentDirection);
      digitalWrite(sleepPin, powerStatus);
 
+     Serial.println(dirPin);
+     Serial.println(stepPin);
+     Serial.println(sleepPin);
+     Serial.println(modePin0);
+     Serial.println(modePin1);
+     Serial.println(modePin2);
+     Serial.println(stepsPerRevolution);
+
   }
 
 
@@ -87,7 +97,7 @@ class stepper {
   }
 
   void change_direction(){
-    currentDirection = ~currentDirection;
+    currentDirection = !currentDirection;
     digitalWrite(dirPin, currentDirection);
   }
 
@@ -118,9 +128,9 @@ class stepper {
     // Change mode variable and set pins
     bool tmp;
     if(modePin0>=0){
-      tmp = bitRead(new_mode, 0);
-      bitWrite(mode, 0, tmp);
-      digitalWrite(modePin0, tmp);
+      tmp = bitRead(new_mode, 0);   //Get state of mode pin 0
+      bitWrite(mode, 0, tmp);       //Set this state in object var
+      digitalWrite(modePin0, tmp);  //Set it in hardware too
     }
     if(modePin1>=0){
       tmp = bitRead(new_mode, 1);
@@ -146,7 +156,7 @@ class stepper {
     
   }
 
-  void take_step(int del){
+  void take_step(unsigned int del){
     /*
      * Steps the motor once
      * del is the total duration for this
@@ -163,52 +173,46 @@ class stepper {
 
 
 
-stepper stepper1(3, 2, 4, 200, -1, -1, 5);
+stepper_driver motor1(2, 3, 4);
+stepper_driver motor2(5, 6, 7);
+stepper_driver motor3(8, 9, 10);
 
 void setup()
 {
   Serial.begin(9600);
 
-  stepper1.turn_on();
-  spin(stepper1, 2, 5);
-  stepper1.turn_off();
+  motor2.turn_on();
+  motor3.turn_on();
+  motor3.change_direction();
+  spin(motor2, 4, 2);
+  spin(motor3, 4, 2);
+  motor2.turn_off();
+  motor3.turn_off();
 
-//  unsigned long T = 3000;             //duration in ms
-//  float S = 2.5;                      //revolutions to spin
-//  sin_move(stepper1, T, S);
-//
-//  stepper1.turn_off();
-//  
-//  delay(2000);
-//  stepper1.turn_on();
-//  stepper1.change_mode(4);
-//  sin_move(stepper1, T, S);
-//  stepper1.turn_off();
 }
 
 void loop(){
 }
 
-void spin(stepper motor, int f, int t){
+
+
+void spin(stepper_driver motor, int f, int t){
   /*
    * Spins the motor at a given frequency f for
    * t seconds
-   * 
-   * We want to take <stepsPerRevolution> steps
-   * in 1/f SECONDS = 1,000,000/f MICROseconds
-   * So, each step should take
-   * 1,000,000/(f*stepsPerRevolution) us
-   * 
-   * We want to take t*1000000/del steps
    */
-  int del = 1000000/(f*motor.stepsPerRevolution);
-  int steps = 1000000*t/del;
-  for(int step_no=0; step_no<steps; step_no++){
+
+  unsigned long period = 1000000/f; //period of the revolutions (us)
+  unsigned int del = period/motor.stepsPerRevolution; //delay between each step
+  unsigned long steps = 1000000*t/del;
+  for(unsigned long step_no=0; step_no<steps; step_no++){
     motor.take_step(del);
   }
 }
 
-void sin_move(stepper motor, int T, float S){
+
+
+void sin_move(stepper_driver motor, int T, float S){
   /*
    * Moves a stepper in a sinusoidal motion
    * 
