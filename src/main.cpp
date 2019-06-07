@@ -15,10 +15,18 @@ AccelStepper stepper3(1, 9, 8);
 
 void setup(){
 
-  // Set max speeds (steps per second)
-  stepper1.setMaxSpeed(1000);
+  // Set max speeds (steps per second) and accelerations
+  stepper1.setMaxSpeed(4000);
   stepper2.setMaxSpeed(1000);
   stepper3.setMaxSpeed(1000);
+  stepper1.setAcceleration(100);
+  stepper2.setAcceleration(50);
+  stepper3.setAcceleration(50);
+
+  // Set positions to move to
+  stepper1.moveTo(700);
+  stepper2.moveTo(10000);
+  stepper3.moveTo(10000);
 
   // Switch on motors
   pinMode(4, OUTPUT);
@@ -28,15 +36,15 @@ void setup(){
   digitalWrite(7, HIGH);
   digitalWrite(10, HIGH);
 
-  // Set speeds of motors
-  stepper1.setSpeed(1000);
-  stepper2.setSpeed(1000);
-  stepper3.setSpeed(1000);
-
 }
 
 void loop(){
-  stepper1.runSpeed();
-  stepper2.runSpeed();
-  stepper3.runSpeed();
+  // Change direction at the limits for stepper 1
+  if (stepper1.distanceToGo() == 0){
+      stepper1.moveTo(-stepper1.currentPosition());
+  }
+
+  stepper1.run();
+  stepper2.run();
+  stepper3.run();
 }
