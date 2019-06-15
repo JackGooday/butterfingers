@@ -1,10 +1,10 @@
 #include "Arduino.h"
 
-int analogPin = A0;
+int analogPin = A9;
 int val = 0;
 
 void setup(){
-  Serial.begin(9600);
+  Serial.begin(38400);
 }
 
 void loop(){
