@@ -1,30 +1,21 @@
-
 #include "Arduino.h"
-
 #include <SBUS.h>
+#include "Plotter.h"
 
-// a SBUS object, which is on hardware
-// serial port 1
 SBUS x8r(Serial1);
+Plotter p;
 
-// channel, fail safe, and lost frames data
 uint16_t channels[16];
 bool failSafe;
 bool lostFrame;
 
 void setup() {
-  // begin the SBUS communication
   x8r.begin();
-  Serial.begin(9600);
+  p.Begin();
+  p.AddTimeGraph("5 variable time graph", 10000, "Channel 1 (A)", channels[0], "Channel 2 (E)", channels[1], "Channel 3 (T)", channels[2], "Channel 4 (R)", channels[3]);
 }
 
 void loop() {
-
-  // look for a good SBUS packet from the receiver
-  if(x8r.read(&channels[0], &failSafe, &lostFrame)){
-
-    // write the SBUS packet to an SBUS compatible servo
-    //x8r.write(&channels[0]);
-    Serial.println("Good packet");
-  }
+  x8r.read(&channels[0], &failSafe, &lostFrame);
+  p.Plot();
 }
