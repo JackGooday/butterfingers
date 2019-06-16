@@ -9,12 +9,9 @@ For the non-geared motor, full step @ 1000 steps/sec (why???)
 
 //Create stepper objects. motor interface, stepPin, dirPin
 // Motor interface = 1 (driver)
-AccelStepper stepper1(1, 3, 2);
-AccelStepper stepper2(1, 6, 5);
-AccelStepper stepper3(1, 9, 8);
-
-int analogPin = A0;
-int analogVal = 0;
+AccelStepper stepper1(1, 35, 34);
+AccelStepper stepper2(1, 14, 13);
+AccelStepper stepper3(1, 17, 16);
 
 void setup(){
 
@@ -27,34 +24,30 @@ void setup(){
   stepper3.setAcceleration(50);
 
   // Set positions to move to
-  stepper1.moveTo(700);
+  stepper1.moveTo(10000);
   stepper2.moveTo(10000);
   stepper3.moveTo(10000);
 
   // Switch on motors
-  pinMode(4, OUTPUT);
-  pinMode(7, OUTPUT);
-  pinMode(10, OUTPUT);
-  digitalWrite(4, HIGH);
-  //digitalWrite(7, HIGH);
-  //digitalWrite(10, HIGH);
+  pinMode(36, OUTPUT);
+  pinMode(15, OUTPUT);
+  pinMode(18, OUTPUT);
+  digitalWrite(36, HIGH);
+  digitalWrite(15, HIGH);
+  digitalWrite(18, HIGH);
 
 }
 
 void loop(){
 
-  // Read the pot an round to the nearest 2 to stop jitter
-  analogVal = analogRead(analogPin);
-  analogVal /= 2;
-  analogVal *= 2;
-  stepper1.moveTo(analogVal);
-
-  // If the motor is already at the correct position,
-  // switch it off
   if(stepper1.distanceToGo() == 0){
-    digitalWrite(4, LOW);
-  } else{
-    digitalWrite(4, HIGH);
+    digitalWrite(36, LOW);
+  }
+  if(stepper2.distanceToGo() == 0){
+    digitalWrite(15, LOW);
+  }
+  if(stepper3.distanceToGo() == 0){
+    digitalWrite(18, LOW);
   }
 
   stepper1.run();
