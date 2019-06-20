@@ -27,9 +27,9 @@ void setup(){
   stepper1.setMaxSpeed(4000);
   stepper2.setMaxSpeed(1000);
   stepper3.setMaxSpeed(1000);
-  stepper1.setAcceleration(200);
-  stepper2.setAcceleration(50);
-  stepper3.setAcceleration(50);
+  stepper1.setAcceleration(400);
+  stepper2.setAcceleration(400);
+  stepper3.setAcceleration(400);
 
   // Switch on motors
   pinMode(36, OUTPUT);

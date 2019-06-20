@@ -16,7 +16,11 @@ install:
     - platformio update
     # Libraries from PlatformIO Library Registry:
     # https://platformio.org/lib/show/5622/Bolder%20Flight%20Systems%20SBUS
+    # https://platformio.org/lib/show/850/Plotter
+    # https://platformio.org/lib/show/265/AccelStepper
     - platformio lib -g install 5622
+    - platformio lib -g install 850
+    - platformio lib -g install 265
 
 script:
     - platformio ci --board=teensy36
