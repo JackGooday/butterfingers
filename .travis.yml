@@ -14,6 +14,9 @@ env:
 install:
     - pip install -U platformio
     - platformio update
+    # Libraries from PlatformIO Library Registry:
+    # https://platformio.org/lib/show/5622/Bolder%20Flight%20Systems%20SBUS
+    - platformio lib -g install 5622
 
 script:
     - platformio ci --board=teensy36
