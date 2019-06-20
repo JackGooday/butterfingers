@@ -1,11 +1,14 @@
-
-/*
-The two geared motors run pretty smooth set to 1/32 step @ 1000 steps/sec
-For the non-geared motor, full step @ 1000 steps/sec (why???)
-*/
-
 #include "Arduino.h"
+#include <SBUS.h>
+#include "Plotter.h"
 #include <AccelStepper.h>
+
+SBUS x8r(Serial1);
+Plotter p;
+
+uint16_t channels[16];
+bool failSafe;
+bool lostFrame;
 
 //Create stepper objects. motor interface, stepPin, dirPin
 // Motor interface = 1 (driver)
@@ -14,6 +17,10 @@ AccelStepper stepper2(1, 14, 13);
 AccelStepper stepper3(1, 17, 16);
 
 void setup(){
+  
+  x8r.begin();
+  p.Begin();
+  p.AddTimeGraph("5 variable time graph", 10000, "Channel 1 (A)", channels[0], "Channel 2 (E)", channels[1], "Channel 3 (T)", channels[2], "Channel 4 (R)", channels[3]);
 
   // Set max speeds (steps per second) and accelerations
   stepper1.setMaxSpeed(4000);
@@ -39,6 +46,9 @@ void setup(){
 }
 
 void loop(){
+  
+  x8r.read(&channels[0], &failSafe, &lostFrame);
+  p.Plot();
 
   if(stepper1.distanceToGo() == 0){
     digitalWrite(36, LOW);
