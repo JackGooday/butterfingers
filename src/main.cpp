@@ -3,9 +3,9 @@
 #include "Plotter.h"
 #include <AccelStepper.h>
 
-SBUS x8r(Serial1);
 Plotter p;
 
+SBUS rsxr(Serial1);
 uint16_t channels[16];
 bool failSafe;
 bool lostFrame;
@@ -17,10 +17,11 @@ AccelStepper stepper2(1, 14, 13);
 AccelStepper stepper3(1, 17, 16);
 
 void setup(){
-  
-  x8r.begin();
+
   p.Begin();
   p.AddTimeGraph("5 variable time graph", 10000, "Channel 1 (A)", channels[0], "Channel 2 (E)", channels[1], "Channel 3 (T)", channels[2], "Channel 4 (R)", channels[3]);
+
+  rsxr.begin();
 
   // Set max speeds (steps per second) and accelerations
   stepper1.setMaxSpeed(4000);
@@ -29,11 +30,6 @@ void setup(){
   stepper1.setAcceleration(200);
   stepper2.setAcceleration(50);
   stepper3.setAcceleration(50);
-
-  // Set positions to move to
-  stepper1.moveTo(10000);
-  stepper2.moveTo(10000);
-  stepper3.moveTo(10000);
 
   // Switch on motors
   pinMode(36, OUTPUT);
@@ -46,19 +42,23 @@ void setup(){
 }
 
 void loop(){
-  
-  x8r.read(&channels[0], &failSafe, &lostFrame);
+
+  rsxr.read(&channels[0], &failSafe, &lostFrame);
   p.Plot();
 
-  if(stepper1.distanceToGo() == 0){
-    digitalWrite(36, LOW);
-  }
-  if(stepper2.distanceToGo() == 0){
-    digitalWrite(15, LOW);
-  }
-  if(stepper3.distanceToGo() == 0){
-    digitalWrite(18, LOW);
-  }
+  //if(stepper1.distanceToGo() == 0){
+  //  digitalWrite(36, LOW);
+  //}
+  //if(stepper2.distanceToGo() == 0){
+  //  digitalWrite(15, LOW);
+  //}
+  //if(stepper3.distanceToGo() == 0){
+  //  digitalWrite(18, LOW);
+  //}
+
+  stepper1.moveTo(channels[0]);
+  stepper2.moveTo(channels[1]);
+  stepper3.moveTo(channels[2]);
 
   stepper1.run();
   stepper2.run();
